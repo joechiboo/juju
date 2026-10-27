@@ -41,7 +41,17 @@ curl -X POST https://api.line.me/v2/bot/message/push \
 
 Windows cmd 要寫成一行、全用雙引號，且訊息內容用英文（cmd 送中文會變亂碼）。
 
-回應 `{}` 代表成功；401 是 token 有誤，403 多半是尚未加小鳥為好友。
+HTTP 200 並回應 `{"sentMessages":[{"id":"...",...}]}` 代表成功（早期 API 回 `{}`）；401 是 token 有誤，403 多半是尚未加小鳥為好友。
+
+只想確認 token 屬於哪個帳號、不想真的推播時：
+
+```bash
+curl -s https://api.line.me/v2/bot/info -H "Authorization: Bearer $LINE_CHANNEL_ACCESS_TOKEN"
+```
+
+回應的 `basicId` 應為 `@466jzkvn`。
+
+2026-10-27 首次驗證通過（推播成功、手機收到「啾」）。
 
 ## 加進群組
 
