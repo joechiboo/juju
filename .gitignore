@@ -1,0 +1,24 @@
+# secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# agent runtime
+logs/
+*.log
+data/
+.cache/
+
+# os / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# node / python
+node_modules/
+__pycache__/
+*.pyc
+.venv/
