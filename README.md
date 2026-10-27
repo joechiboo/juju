@@ -34,6 +34,7 @@ juju/
 - `.env` 永遠不進 repo。Channel secret、access token、User ID、Group ID 全部只住在 Mac 本機的 `.env`。
 - 這是 public repo。任何東西 commit 前先問一句：這能被陌生人看到嗎？
 - GitHub 的 Secret scanning → Push protection 保持開啟。
+- clone 後先跑 `git config core.hooksPath .githooks`，啟用 pre-commit 檢查：擋 `.env`、API key、LINE ID 格式，以及本機 `.env` 裡任何實際值。GitHub 的 push protection 不認得 LINE 的 secret 和 ID，這層才擋得到。
 
 ## 部署
 

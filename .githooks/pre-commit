@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# 擋住機密資訊進 repo（這是 public repo）。
+# 啟用：git config core.hooksPath .githooks
+# 確定是誤判才用：git commit --no-verify
+
+set -u
+fail=0
+
+warn() {
+  echo "🐦 啾！$1" >&2
+  fail=1
+}
+
+# 1. .env 系列檔案（範本除外）
+while IFS= read -r f; do
+  case "$(basename "$f")" in
+    .env.example) ;;
+    .env|.env.*) warn "不要 commit $f" ;;
+    *.pem|*.key) warn "不要 commit 金鑰檔 $f" ;;
+  esac
+done < <(git diff --cached --name-only --diff-filter=ACMR)
+
+# 只看這次新增的行
+added=$(git diff --cached -U0 --diff-filter=ACMR -- . ':(exclude).githooks/pre-commit' \
+  | grep '^+' | grep -v '^+++')
+
+# 2. 已知格式
+check() {
+  local label=$1 pattern=$2 hits
+  hits=$(printf '%s\n' "$added" | grep -nE -- "$pattern")
+  # 印出位置但遮掉值，避免警告本身把機密印到畫面上
+  [ -n "$hits" ] && warn "疑似 ${label}："$'\n'"$(printf '%s\n' "$hits" | head -3 \
+    | sed -E 's/([A-Za-z0-9+\/=_-]{4})[A-Za-z0-9+\/=_-]{6,}/\1****/g')"
+}
+check "Anthropic API key"       'sk-ant-[A-Za-z0-9_-]{10,}'
+check "LINE User ID"            '\bU[0-9a-f]{32}\b'
+check "LINE Group/Room ID"      '\b[CR][0-9a-f]{32}\b'
+check "填了值的機密變數"         '(SECRET|TOKEN|_KEY|_ID)[[:space:]]*[=:][[:space:]]*["'\'']?[A-Za-z0-9+/=_-]{16,}'
+
+# 3. 本機 .env 裡的實際值，出現在任何地方都擋
+if [ -f .env ]; then
+  while IFS='=' read -r key value; do
+    case "$key" in ''|\#*) continue ;; esac
+    value=${value%\"}; value=${value#\"}
+    [ ${#value} -lt 8 ] && continue
+    if printf '%s\n' "$added" | grep -qF -- "$value"; then
+      warn "$key 的實際值出現在這次的變更裡"
+    fi
+  done < .env
+fi
+
+if [ $fail -ne 0 ]; then
+  echo "🐦 commit 已擋下。這是 public repo，機密只放本機 .env。" >&2
+  exit 1
+fi
