@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  每 5 分鐘跑 battery-alert。
+  安裝：cp 到 ~/Library/LaunchAgents/ 後 launchctl bootstrap gui/$(id -u) <檔案>
+  Mac 睡著時不會跑。
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.joechiboo.juju.battery-alert</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string>
+    <string>-c</string>
+    <string>echo "=== $(date '+%F %T')"; /usr/bin/python3 skills/battery-alert/run.py</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/joechiboo/dev/juju</string>
+
+  <!-- pmset 在 /usr/bin，沿用同一組 PATH -->
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/bin:/bin</string>
+  </dict>
+
+  <key>StartInterval</key>
+  <integer>300</integer>
+
+  <key>StandardOutPath</key>
+  <string>/Users/joechiboo/dev/juju/logs/battery-alert.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/joechiboo/dev/juju/logs/battery-alert.log</string>
+</dict>
+</plist>

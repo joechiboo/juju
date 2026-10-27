@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  每週一 09:00 跑 github-patrol。
+  安裝：cp 到 ~/Library/LaunchAgents/ 後 launchctl bootstrap gui/$(id -u) <檔案>
+  Mac 睡著時錯過的時段，醒來後會補跑一次；關機則不會。
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.joechiboo.juju.github-patrol</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string>
+    <string>-c</string>
+    <string>echo "=== $(date '+%F %T')"; /usr/bin/python3 skills/github-patrol/run.py</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/joechiboo/dev/juju</string>
+
+  <!-- launchd 的 PATH 不含 Homebrew，gh 在 /opt/homebrew/bin -->
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/bin:/bin</string>
+  </dict>
+
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Weekday</key>
+    <integer>1</integer>
+    <key>Hour</key>
+    <integer>9</integer>
+    <key>Minute</key>
+    <integer>0</integer>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>/Users/joechiboo/dev/juju/logs/github-patrol.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/joechiboo/dev/juju/logs/github-patrol.log</string>
+</dict>
+</plist>
