@@ -44,3 +44,18 @@ juju/
 3. 啟動 agent，確認小鳥能主動說一句「啾」
 
 LINE 端設定見 [docs/line-setup.md](docs/line-setup.md)，Hermes 接法與驗證見 [docs/hermes-line.md](docs/hermes-line.md)。
+
+## 下一步（2026-10-27 收工時的狀態）
+
+已完成：LINE 官方帳號建好、Messaging API 啟用、自動回應關閉、Push API 驗證成功、自己的 User ID 已取得。
+
+明天在 Mac 上：
+
+1. `git clone https://github.com/joechiboo/juju.git`
+2. 到 Developers Console 重發 Channel secret 與 access token（舊的已曝光），直接填進 `.env`
+3. 裝 Hermes，`.env` 先填 `LINE_CHANNEL_ACCESS_TOKEN`、`LINE_CHANNEL_SECRET`、`LINE_ALLOWED_USERS`、`LINE_HOME_CHANNEL`（後兩個都填自己的 `U` ID）
+4. 先走 B 路線：做一個 `deliver: line` 的 cron，讓小鳥主動說一句「啾」
+5. 想在 LINE 裡對話再開 tunnel、填 Webhook URL（Console → Messaging API → Webhook settings）
+6. 家庭群組 ID 等 webhook 接通後從 gateway.log 撈，再填 `LINE_ALLOWED_GROUPS`
+
+提醒：`U` 開頭的 User ID 來自 Developers Console，和 LINE app 裡的 LINE ID 是兩回事。
