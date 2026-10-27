@@ -75,37 +75,47 @@ Group ID 只有一個來源：小鳥被拉進群時，LINE 會往 webhook 打一
 
 - 在 OA Manager 換的大頭貼要幾分鐘才同步到好友端，手機重開 LINE 即可
 
-## 接進 OpenClaw（龍蝦）
+## 接進 Hermes Agent
 
-OpenClaw 有官方 LINE plugin，但它要求開啟 webhook，且必須是 LINE 打得到的公開 HTTPS 網址——走這條路 Mac 一定得對外開洞（Cloudflare Tunnel 或 ngrok）。
+Hermes 內建 LINE 支援，環境變數名稱與本 repo 的 `.env.example` 一致。
 
-### A. 完整接法（LINE 裡能對話，需要 tunnel）
+### 設定
 
-```bash
-openclaw plugins install @openclaw/line
+`~/.hermes/config.yaml`：
+
+```yaml
+gateway:
+  platforms:
+    line:
+      enabled: true
 ```
 
-設定檔：
+`~/.hermes/.env`（或由 juju 的 `.env` 載入）：
 
-```json5
-channels: {
-  line: {
-    enabled: true,
-    channelAccessToken: "<token>",   // 或環境變數 LINE_CHANNEL_ACCESS_TOKEN
-    channelSecret: "<secret>",       // 或 LINE_CHANNEL_SECRET
-    dmPolicy: "allowlist",
-    allowFrom: ["<LINE_OWNER_USER_ID>"]
-  }
-}
+```
+LINE_CHANNEL_ACCESS_TOKEN=
+LINE_CHANNEL_SECRET=
+LINE_ALLOWED_USERS=<LINE_OWNER_USER_ID>     # 誰能跟小鳥說話，逗號分隔
+LINE_ALLOWED_GROUPS=<LINE_FAMILY_GROUP_ID>  # 有家庭群組再填
+LINE_HOME_CHANNEL=<LINE_OWNER_USER_ID>      # cron 推播的預設目的地
 ```
 
-Webhook URL 設為 `https://<tunnel 網址>/line/webhook`，用 `openclaw channels status --probe` 確認已註冊。
+`LINE_PORT` 預設 8646；要傳圖片／音訊才需要 `LINE_PUBLIC_URL`。
 
-參考：https://docs.openclaw.ai/channels/line
+### 兩種用法
 
-### B. 最小解（只推播，不開洞）— 先走這條
+**B. 只推播（先走這條，Mac 不開洞）**
+Hermes 的 cron 支援 `deliver: line`，透過獨立的 push-only sender 送到 `LINE_HOME_CHANNEL`，cron 與 gateway 分開跑也可以。`skills/token-report/` 就用這個機制，不必自己呼叫 Push API。
 
-不用 plugin。`skills/token-report/` 放一個小腳本，查完額度直接呼叫 Push API 送出，用 OpenClaw 排程或 macOS launchd 每天跑一次。Mac 完全不暴露。
+**A. 在 LINE 裡對話（需要公開 HTTPS）**
+Webhook 路徑 `/line/webhook`。文件建議 Cloudflare Tunnel（正式用，最好是固定名稱的 named tunnel）、ngrok（開發用）。Webhook URL 填 `https://<tunnel 網址>/line/webhook`。
 
-小鳥會說話之後，哪天想在 LINE 裡跟它聊，再補 A。
+### 撈 Group ID 的另一種方法（webhook 已接通時）
 
+把小鳥邀進群、在群裡送一則訊息，到 `~/.hermes/logs/gateway.log` 找「rejecting unauthorized source」那行，`C` 開頭的就是 Group ID。比 webhook.site 乾淨，但前提是 A 已經接通。
+
+參考：https://hermes-agent.nousresearch.com/docs/user-guide/messaging/line
+
+### 備註：OpenClaw（龍蝦）
+
+另一個選項。官方 LINE plugin（`openclaw plugins install @openclaw/line`）同樣要求公開 HTTPS webhook；設定在 `channels.line`，`dmPolicy: "allowlist"` 加 `allowFrom`。參考：https://docs.openclaw.ai/channels/line

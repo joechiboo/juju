@@ -1,6 +1,6 @@
 # 小鳥啾啾 (juju)
 
-透過 LINE 互動的個人 agent。這個 repo 收納它的設定、技能（skills）與排程；agent 本體跑在家裡的 Mac 上。
+透過 LINE 互動的個人 agent，引擎用 Hermes Agent。這個 repo 收納它的設定、技能（skills）與排程；agent 本體跑在家裡的 Mac 上。
 
 ## 它負責什麼
 
