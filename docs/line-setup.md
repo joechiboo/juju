@@ -55,11 +55,57 @@ curl -s https://api.line.me/v2/bot/info -H "Authorization: Bearer $LINE_CHANNEL_
 
 ## 加進群組
 
-1. 開啟 Allow bot to join group chats
-2. 把小鳥邀進群
-3. 小鳥加入時 LINE 會打一個 `join` 事件到 webhook，內含 `C` 開頭的 Group ID → 存進 `.env` → `LINE_FAMILY_GROUP_ID`
-4. 撈到 Group ID 後，若只需單向推播，可把 webhook 關掉——否則群裡每句話都會送到 agent
+Group ID 只有一個來源：小鳥被拉進群時，LINE 會往 webhook 打一個 `join` 事件，`C` 開頭的那串就在裡面。所以得臨時開一次 webhook，撈到就關。
+
+最快的做法（不用寫程式）：
+
+1. 開 [webhook.site](https://webhook.site)，複製它給的專屬網址
+2. Developers Console → Messaging API → Webhook URL 貼上 → 存檔 → 打開「Use webhook」→ Verify 應顯示 Success
+3. 在 LINE 把小鳥邀進群組（Allow bot to join group chats 須已開）
+4. 回 webhook.site，會收到一筆 POST，JSON 裡找 `"source": {"type": "group", "groupId": "C..."}`，整串放進 `.env` → `LINE_FAMILY_GROUP_ID`
+5. 立刻回 Console 關掉「Use webhook」
+
+提醒：
+
+- 步驟 2 到 5 之間，群裡的訊息也會進 webhook.site，動作要連貫，撈到立刻關
+- webhook.site 是第三方服務；`join` 事件只含 ID、不含訊息內容，此用途可接受，正式對話的 webhook 不可這樣用
+- 之後要往群裡推播，把 Push API 的 `to` 從 `U...` 換成 `C...` 即可
 
 ## 已知小事
 
 - 在 OA Manager 換的大頭貼要幾分鐘才同步到好友端，手機重開 LINE 即可
+
+## 接進 OpenClaw（龍蝦）
+
+OpenClaw 有官方 LINE plugin，但它要求開啟 webhook，且必須是 LINE 打得到的公開 HTTPS 網址——走這條路 Mac 一定得對外開洞（Cloudflare Tunnel 或 ngrok）。
+
+### A. 完整接法（LINE 裡能對話，需要 tunnel）
+
+```bash
+openclaw plugins install @openclaw/line
+```
+
+設定檔：
+
+```json5
+channels: {
+  line: {
+    enabled: true,
+    channelAccessToken: "<token>",   // 或環境變數 LINE_CHANNEL_ACCESS_TOKEN
+    channelSecret: "<secret>",       // 或 LINE_CHANNEL_SECRET
+    dmPolicy: "allowlist",
+    allowFrom: ["<LINE_OWNER_USER_ID>"]
+  }
+}
+```
+
+Webhook URL 設為 `https://<tunnel 網址>/line/webhook`，用 `openclaw channels status --probe` 確認已註冊。
+
+參考：https://docs.openclaw.ai/channels/line
+
+### B. 最小解（只推播，不開洞）— 先走這條
+
+不用 plugin。`skills/token-report/` 放一個小腳本，查完額度直接呼叫 Push API 送出，用 OpenClaw 排程或 macOS launchd 每天跑一次。Mac 完全不暴露。
+
+小鳥會說話之後，哪天想在 LINE 裡跟它聊，再補 A。
+
