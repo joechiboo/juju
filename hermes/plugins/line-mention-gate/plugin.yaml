@@ -1,0 +1,5 @@
+name: line-mention-gate
+version: "1.0"
+description: >
+  LINE 群組／聊天室只在小鳥被 @ 時才回應；私訊不受影響。
+  Hermes 的 LINE adapter 沒有 require_mention，這裡用 pre_gateway_dispatch 補上。

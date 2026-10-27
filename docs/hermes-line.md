@@ -71,6 +71,25 @@ LINE 用 Hermes 預設的全套工具（含 terminal、file、browser），本�
 - `LINE_HOST=127.0.0.1`：webhook 預設聽所有網路介面，改成只聽本機，經 tunnel 進來
 - 不設 `LINE_ALLOW_ALL_USERS`
 
+### 群組只在被 @ 時回應
+
+Hermes 的 LINE adapter 沒有 `require_mention`（只有 Telegram、Signal 有），允許的群組裡每句話都會丟給模型。
+本 repo 的 plugin `hermes/plugins/line-mention-gate/` 掛在 `pre_gateway_dispatch` 補上：
+
+- 群組／聊天室：LINE 原始事件 `message.mention.mentionees[].isSelf` 為真才放行，並去掉開頭的 `@小鳥`（所以 `@小鳥啾啾 /approve` 可用）；其餘直接略過，不呼叫模型
+- 私訊不受影響
+- 要在 LINE 輸入框打 `@` 從名單點選小鳥；手打文字不算 mention
+
+安裝（symlink，`hermes update` 不會蓋掉）：
+
+```bash
+ln -sfn ~/dev/juju/hermes/plugins/line-mention-gate ~/.hermes/plugins/line-mention-gate
+hermes plugins enable line-mention-gate
+# 重啟 gateway
+```
+
+2026-10-27 實測：群組未 @ 的兩則被略過、@ 的一則放行並回覆。
+
 考慮過但沒採用：開第二個 LINE 官方帳號＋第二個 Hermes profile，家人用的小鳥只給 `web`／`memory`／`todo`／`skills`，本人專用的才能動 Mac。哪天想收緊權限，從這條路改。
 
 ## 3. 開洞（只有要對話才做）
