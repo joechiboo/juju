@@ -22,7 +22,8 @@
 juju/
 ├── README.md
 ├── docs/
-│   └── line-setup.md     # LINE 官方帳號與 Messaging API 設定紀錄
+│   ├── line-setup.md     # LINE 官方帳號與 Messaging API 設定紀錄
+│   └── hermes-line.md    # Hermes × LINE 部署、存取控制、驗證
 ├── config/               # agent 設定檔（不含任何秘密）
 ├── skills/               # 一個任務一個資料夾
 ├── .env.example          # 需要的環境變數清單，值留空
@@ -42,4 +43,4 @@ juju/
 2. 讓 Mac 不睡：系統設定 → 能源 → 接電時防止自動睡眠，或 `caffeinate -i`
 3. 啟動 agent，確認小鳥能主動說一句「啾」
 
-詳細的 LINE 端設定見 [docs/line-setup.md](docs/line-setup.md)。
+LINE 端設定見 [docs/line-setup.md](docs/line-setup.md)，Hermes 接法與驗證見 [docs/hermes-line.md](docs/hermes-line.md)。

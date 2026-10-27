@@ -77,44 +77,7 @@ Group ID 只有一個來源：小鳥被拉進群時，LINE 會往 webhook 打一
 
 ## 接進 Hermes Agent
 
-Hermes 內建 LINE 支援，環境變數名稱與本 repo 的 `.env.example` 一致。
-
-### 設定
-
-`~/.hermes/config.yaml`：
-
-```yaml
-gateway:
-  platforms:
-    line:
-      enabled: true
-```
-
-`~/.hermes/.env`（或由 juju 的 `.env` 載入）：
-
-```
-LINE_CHANNEL_ACCESS_TOKEN=
-LINE_CHANNEL_SECRET=
-LINE_ALLOWED_USERS=<LINE_OWNER_USER_ID>     # 誰能跟小鳥說話，逗號分隔
-LINE_ALLOWED_GROUPS=<LINE_FAMILY_GROUP_ID>  # 有家庭群組再填
-LINE_HOME_CHANNEL=<LINE_OWNER_USER_ID>      # cron 推播的預設目的地
-```
-
-`LINE_PORT` 預設 8646；要傳圖片／音訊才需要 `LINE_PUBLIC_URL`。
-
-### 兩種用法
-
-**B. 只推播（先走這條，Mac 不開洞）**
-Hermes 的 cron 支援 `deliver: line`，透過獨立的 push-only sender 送到 `LINE_HOME_CHANNEL`，cron 與 gateway 分開跑也可以。`skills/token-report/` 就用這個機制，不必自己呼叫 Push API。
-
-**A. 在 LINE 裡對話（需要公開 HTTPS）**
-Webhook 路徑 `/line/webhook`。文件建議 Cloudflare Tunnel（正式用，最好是固定名稱的 named tunnel）、ngrok（開發用）。Webhook URL 填 `https://<tunnel 網址>/line/webhook`。
-
-### 撈 Group ID 的另一種方法（webhook 已接通時）
-
-把小鳥邀進群、在群裡送一則訊息，到 `~/.hermes/logs/gateway.log` 找「rejecting unauthorized source」那行，`C` 開頭的就是 Group ID。比 webhook.site 乾淨，但前提是 A 已經接通。
-
-參考：https://hermes-agent.nousresearch.com/docs/user-guide/messaging/line
+完整的部署、存取控制與驗證步驟見 [hermes-line.md](hermes-line.md)。
 
 ### 備註：OpenClaw（龍蝦）
 
