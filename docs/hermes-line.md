@@ -53,6 +53,26 @@ LINE_HOME_CHANNEL=<U...>           # cron 與通知的預設目的地，只能�
 
 沒有配對／審核流程；文件也沒說被拒絕的人會不會收到回覆。
 
+原始碼補充（v0.22.5，`plugins/platforms/line/adapter.py` 的 `_allowed_for_source`）：私訊檢查 `LINE_ALLOWED_USERS`，陌生人會被擋；群組與聊天室只檢查 `C`／`R` ID 本身，**不看是群裡哪個人說的**。上面第 4 節的反向測試仍要做，確認實際行為與原始碼一致。
+
+## 2.1 權限決定（2026-10-27）
+
+LINE 用 Hermes 預設的全套工具（含 terminal、file、browser），本人私訊與家庭群組都允許。
+
+已知且接受的取捨：
+
+- 家庭群組加進 `LINE_ALLOWED_GROUPS` 後，**每位成員**都能叫小鳥執行指令
+- `/approve` 不檢查是誰按的（`gateway/slash_commands.py` 的 `_handle_approve_command`），群組任何人都能核准危險指令，也能用 `/yolo` 關掉確認
+- 工具只能按平台設定（`platform_toolsets`），不能按人或按聊天室區分
+
+保留的防線：
+
+- `approvals.mode: manual`：危險指令一律停下等 `/approve`（不用預設的 `smart`，它要靠 OpenRouter 的輔助模型判斷，這裡沒有 OpenRouter）
+- `LINE_HOST=127.0.0.1`：webhook 預設聽所有網路介面，改成只聽本機，經 tunnel 進來
+- 不設 `LINE_ALLOW_ALL_USERS`
+
+考慮過但沒採用：開第二個 LINE 官方帳號＋第二個 Hermes profile，家人用的小鳥只給 `web`／`memory`／`todo`／`skills`，本人專用的才能動 Mac。哪天想收緊權限，從這條路改。
+
 ## 3. 開洞（只有要對話才做）
 
 ```bash
