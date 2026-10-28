@@ -93,11 +93,13 @@ hermes plugins enable line-mention-gate
 ### 核准提示與硬性禁止（2026-10-28）
 
 - `display.language: zh-hant`：核准提示改繁中；等核准時直接回「好／確認／批准／👍」即同意，「不／取消／👎」即拒絕（`gateway/run_busy.py` 的 `_route_plaintext_approval_while_busy`）。回其他話會被當成插話（`/steer`）排隊，不算核准，5 分鐘後逾時拒絕
-- `approvals.deny`：40 條 fnmatch 規則（不分大小寫、會先還原 `r\m` 這類混淆），符合就直接拒絕，`/approve`、`/yolo`、`mode: off` 都放不行（`tools/approval_floors.py`）。涵蓋：
+- `approvals.deny`：43 條 fnmatch 規則（不分大小寫、會先還原 `r\m` 這類混淆），符合就直接拒絕，`/approve`、`/yolo`、`mode: off` 都放不行（`tools/approval_floors.py`）。涵蓋：
   - Documents／Desktop／Downloads／Pictures／Movies／Music／iCloud（Mobile Documents）／Library/CloudStorage 底下的 `rm`、`find -delete`（含先 `cd` 再 `rm` 的寫法）
   - `rm -r ~`、`$HOME`、`/Users`；`diskutil erase/partition/reformat`、`mkfs`、`dd of=/dev/`、`tmutil delete`
   - 讀 SSH 私鑰、`security find-*-password`／`dump-keychain`
   - `git push --force`／`-f`；`hermes config set approvals/security`（不讓小鳥自己拆防線）
+  - `hermes gateway restart/stop`：小鳥在對話中重啟自己會死結（重啟要等進行中的對話結束，而那則對話在等重啟指令），2026-10-28 卡過一次、新訊息全回 `runtime_draining`，最後用 `launchctl kickstart -k gui/$(id -u)/ai.hermes.gateway` 解開
+  - 任何碰到 `.hermes/.env` 的指令：不讓小鳥用 terminal 改授權名單或讀金鑰（寫檔工具本來就擋 `.env`）。加人由本人在 Mac 上改
 - 已知限制：只管 terminal 指令；小鳥的寫檔工具覆蓋檔案、`execute_code` 寫 Python 刪檔都不經過這份清單。真正的保險是備份（這台 Mac 目前**沒有** Time Machine）
 
 考慮過但沒採用（2026-10-28）：群組裡只認本人核准的 plugin、`HERMES_WRITE_SAFE_ROOT` 限制寫檔範圍、terminal 改跑 Docker。
