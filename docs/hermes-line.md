@@ -99,7 +99,9 @@ cloudflared tunnel --url http://localhost:8646   # 正式用建議改 named tunn
 ngrok http 8646                                  # 開發用
 ```
 
-Tunnel 要一直開著。拿到 `https://` 網址後：
+**目前做法（2026-10-28）**：沒有網域，用 `skills/line-tunnel/` 常駐（launchd `com.joechiboo.juju.line-tunnel`）顧臨時 tunnel，斷了自動重開並用 LINE API 改 webhook URL，不用進 Console。細節見該 skill 的 `SKILL.md`。
+
+手動做法：Tunnel 要一直開著。拿到 `https://` 網址後：
 Developers Console → Messaging API → Webhook URL 填 `https://<tunnel>/line/webhook` → Verify 應得 200 → 開啟 Use webhook。
 
 ## 4. 啟動與驗證

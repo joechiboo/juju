@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  常駐 line-tunnel：顧 cloudflared 臨時 tunnel，網址換了自動改 LINE webhook。
+  安裝：cp 到 ~/Library/LaunchAgents/ 後 launchctl bootstrap gui/$(id -u) <檔案>
+  掛了 launchd 會重開（KeepAlive），最快 30 秒一次（ThrottleInterval）。
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.joechiboo.juju.line-tunnel</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/python3</string>
+    <string>-u</string>
+    <string>skills/line-tunnel/run.py</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/joechiboo/dev/juju</string>
+
+  <!-- cloudflared 在 /opt/homebrew/bin -->
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/bin:/bin</string>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>30</integer>
+
+  <key>StandardOutPath</key>
+  <string>/Users/joechiboo/dev/juju/logs/line-tunnel.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/joechiboo/dev/juju/logs/line-tunnel.log</string>
+</dict>
+</plist>
