@@ -18,11 +18,12 @@ LINE 要透過公開 HTTPS 才找得到 Mac 上的 Hermes gateway。沒有自己
 
 - 開 tunnel → 等外網 health 通 → `PUT /v2/bot/channel/webhook/endpoint` 改 LINE webhook，再 `GET` 確認
 - 每 60 秒從外網打一次 `/line/webhook/health`；連續 3 次失敗或 cloudflared 結束就重開、換網址
+- 每 5 秒看一次牆上時鐘，一次跳超過 35 秒就當作 Mac 剛睡醒：等 10 秒讓網路接回，馬上檢查，不通直接重開（不等 3 次）。用 `time.time()` 因為 macOS 睡眠時 `monotonic` 會停
 - gateway 本機 health 不通時不動 tunnel（gateway 由 `ai.hermes.gateway` 負責重啟）
 - 起不來時重試間隔從 5 秒倍增到最多 5 分鐘
 
 ## 限制
 
 - 斷線到偵測、重開大約 3～4 分鐘，這段時間傳給小鳥的訊息要靠 LINE 的 Webhook redelivery
-- Mac 睡著時什麼都不會跑；醒來後第一輪檢查就會接回
+- Mac 睡著時什麼都不會跑；醒來後約 30～40 秒接回（2026-10-30 用 SIGSTOP 凍結 45 秒模擬：睡醒後 37 秒上線）。新網址偶爾第一次查 DNS 會失敗，再換一個網址重試，多花 20～70 秒
 - 有 Cloudflare 網域後應改用 named tunnel（網址固定，不必改 webhook），這支就可以退役

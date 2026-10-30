@@ -4,7 +4,8 @@
 這支常駐（launchd KeepAlive）做三件事：
 1. 開 cloudflared，抓到新網址後用 LINE API 改 webhook URL
 2. 每分鐘從外網打一次 health；連續失敗 MAX_FAILS 次或 cloudflared 結束就重開
-3. gateway 本機 health 不通時不動 tunnel（那是 Hermes 的事，由 ai.hermes.gateway 負責）
+3. Mac 剛睡醒時馬上檢查，不通就直接重開（睡太久 tunnel 通常已作廢）
+4. gateway 本機 health 不通時不動 tunnel（那是 Hermes 的事，由 ai.hermes.gateway 負責）
 
 用法：python3 -u skills/line-tunnel/run.py
 """
@@ -29,6 +30,9 @@ WEBHOOK = "/line/webhook"
 CHECK_EVERY = 60     # 秒
 MAX_FAILS = 3        # 外網 health 連續失敗幾次就重開
 START_TIMEOUT = 60   # 等 cloudflared 給網址、連上的秒數
+TICK = 5             # 多久看一次時鐘；牆上時鐘一次跳很多 = 剛睡醒
+WAKE_GAP = 30        # 比 TICK 多出這麼多秒就當作睡過（macOS 睡眠時 monotonic 會停，所以用 time.time）
+WAKE_SETTLE = 10     # 睡醒後先等 Wi-Fi 接回再檢查
 URL_RE = re.compile(r"https://[a-z0-9-]+\.trycloudflare\.com")
 
 proc = None
@@ -154,14 +158,27 @@ def main():
         backoff = 5
 
         fails = 0
+        last = time.time()
+        due = last + CHECK_EVERY
         while proc.poll() is None:
-            time.sleep(CHECK_EVERY)
+            time.sleep(TICK)
+            now = time.time()
+            woke = now - last > TICK + WAKE_GAP
+            if woke:
+                log(f"Mac 剛睡醒（{int(now - last)} 秒沒動靜），{WAKE_SETTLE} 秒後檢查")
+                time.sleep(WAKE_SETTLE)
+                now = time.time()
+            last = now
+            if not woke and now < due:
+                continue
+            due = now + CHECK_EVERY
+
             if healthy(url):
                 fails = 0
             elif not healthy(LOCAL):
                 log("gateway 本機不通，tunnel 先不動")
             else:
-                fails += 1
+                fails = MAX_FAILS if woke else fails + 1
                 log(f"外網 health 失敗 {fails}/{MAX_FAILS}")
                 if fails >= MAX_FAILS:
                     break
