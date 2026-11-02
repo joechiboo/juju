@@ -1,0 +1,11 @@
+{
+  "timezone": "Asia/Taipei",
+  "weekly_start": "2026-11-02",
+  "events": [
+    {"key": "kid-a-mon-math", "title": "小孩A 數學", "weekday": "MO", "start": "16:30", "end": "18:00", "who": "媽媽 18:20 接", "note": "16:10 下課"},
+    {"key": "kid-b-bus", "title": "小孩B 校車到奶奶家", "weekday": "MO,TU,WE,FR", "start": "17:00", "end": "17:15"},
+    {"key": "kid-a-sun-badminton", "title": "小孩A 羽球", "weekday": "SU", "from": "2026-11-08", "until": "2026-12-31", "start": "14:00", "end": "16:00", "who": "？"},
+    {"key": "fun-run", "title": "路跑", "date": "2026-11-14", "start": "06:00", "end": "09:00"},
+    {"key": "camp", "title": "露營", "date": "2026-12-12", "end_date": "2026-12-13", "all_day": true}
+  ]
+}

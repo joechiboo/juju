@@ -12,3 +12,5 @@
 原本排第一的 `token-report/`（查 API 剩餘額度）往後延：查用量要 Admin API key，個人帳號（Individual Org）不能建，得先把帳號升級成組織。
 
 共用的讀 `.env`、推 LINE 放在 `lib/juju.py`，只用 Python 標準庫，不用裝套件。
+
+- `family-calendar/`：把小鳥維護的接送表同步到家人共用的 Google 日曆（預覽／`--apply`），設定步驟見該資料夾的 `SKILL.md`
