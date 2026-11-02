@@ -12,7 +12,11 @@ Hermes v0.22.5 的 LINE adapter 會回應允許群組裡的每一則訊息，沒
 adapter 會把原始事件放在 event.raw_message。
 """
 
+import datetime
+import json
 import logging
+import os
+import pathlib
 import re
 
 logger = logging.getLogger(__name__)
@@ -29,6 +33,32 @@ APPROVAL_RE = re.compile(r"^/(approve|deny)(\s+(session|always))?\s*$", re.IGNOR
 def _platform_name(source):
     platform = getattr(source, "platform", None)
     return str(getattr(platform, "value", platform) or "").lower()
+
+
+def _log_group_message(event, source):
+    """群組每則文字訊息都存檔（不呼叫模型），給每晚的異動掃描用。失敗不影響放行判斷。
+
+    存到 $HERMES_HOME/group-logs/<chat_id>/<YYYY-MM-DD>.jsonl。
+    """
+    try:
+        text = (getattr(event, "text", "") or "").strip()
+        if not text:
+            return
+        home = pathlib.Path(os.environ.get("HERMES_HOME") or pathlib.Path.home() / ".hermes")
+        chat_id = str(getattr(source, "chat_id", "") or "unknown")
+        now = datetime.datetime.now()
+        folder = home / "group-logs" / chat_id
+        folder.mkdir(parents=True, exist_ok=True)
+        record = {
+            "ts": now.isoformat(timespec="seconds"),
+            "user_id": getattr(source, "user_id", None),
+            "user_name": getattr(source, "user_name", None),
+            "text": text,
+        }
+        with open(folder / f"{now:%Y-%m-%d}.jsonl", "a", encoding="utf-8") as f:
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("line-mention-gate: group log failed: %s", exc)
 
 
 def _self_mentions(raw):
@@ -51,6 +81,8 @@ def gate(event, **kwargs):
         return None
     if getattr(source, "chat_type", "dm") not in GROUP_CHAT_TYPES:
         return None  # 私訊照常
+
+    _log_group_message(event, source)
 
     raw = getattr(event, "raw_message", None)
     mentions = _self_mentions(raw if isinstance(raw, dict) else None)

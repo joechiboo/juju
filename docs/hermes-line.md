@@ -82,6 +82,7 @@ Hermes 的 LINE adapter 沒有 `require_mention`（只有 Telegram、Signal 有�
 - 文字開頭觸發（2026-10-29）：新版 LINE PC 不能 @ 官方帳號，所以訊息**開頭**是 `小鳥`、`啾啾`、`小鳥啾啾`（前面可加 `@`／`＠`，後面可接空白或 `，：、！`）也放行，並去掉這個稱呼再交給模型。句中出現不算（「今天小鳥好可愛」會略過）
 - 核准指令免叫小鳥（2026-10-29）：群組裡整句是 `/approve`、`/approve session`、`/approve always`、`/deny`（不分大小寫）直接放行；是否授權仍由 gateway 檢查。注意：純文字的「好／確認」核准在群組仍要加 `小鳥` 開頭，否則會被略過
 - @All 不算叫到小鳥（LINE 的 @All 沒有 `isSelf`）
+- 群組訊息存檔（2026-11-02）：允許群組裡的每則文字訊息（不管有沒有叫小鳥）都寫進 `$HERMES_HOME/group-logs/<chat_id>/<YYYY-MM-DD>.jsonl`（時間、user_id、文字），不呼叫模型。給每晚 21:30 的「群組接送異動掃描」cron 用：前置腳本沒訊息就 `{"wakeAgent": false}` 不花錢，有異動才私訊使用者確認，沒異動回 `[SILENT]`。私訊不存
 
 安裝（symlink，`hermes update` 不會蓋掉）：
 
