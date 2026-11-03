@@ -110,6 +110,32 @@ hermes plugins enable line-mention-gate
 
 考慮過但沒採用：開第二個 LINE 官方帳號＋第二個 Hermes profile，家人用的小鳥只給 `web`／`memory`／`todo`／`skills`，本人專用的才能動 Mac。哪天想收緊權限，從這條路改。
 
+## 2.2 模型（2026-11-03 魂轉 GPT）
+
+原本是 `anthropic / claude-opus-5-5`（API key，11/14 到期、額度剩約 US$20），改成 ChatGPT 訂閱：
+
+```yaml
+model:
+  default: "gpt-6.1-terra"
+  provider: "openai-codex"        # base_url: https://chatgpt.com/backend-api/codex
+fallback_providers:               # 主模型失敗（限速、錯誤、授權失效）才切
+  - provider: anthropic
+    model: claude-haiku-5-5       # Claude key 到期後自然失效
+```
+
+- 帳號：公司 UCLIT 工作區（ChatGPT Business，資訊室共用帳號）。訂閱額度用完是限速，不另計費；工作區「加購點數」要保持關閉才不會吃公司點數
+- **UCLIT 已取消續約，2027-05-01 停用**，之前要搬（公司續約／個人 ChatGPT Plus／個人 API key）
+- 隱私：Business 管理員看不到對話內容；對話紀錄存在 Mac 本機 `~/.hermes/state.db`
+- 選 terra 不選 sol：怕額度用太快；不夠聰明再換 `gpt-6.1-sol`，常被限速就換 `gpt-5.6-luna`。不要選 `-900k`（小鳥 5 萬 token 就壓縮，用不到長上下文）
+- 輔助任務（壓縮、看圖）沒設，`auto` 在沒有 OpenRouter／Nous 時跟主模型走，所以也是 GPT
+
+登入踩坑：
+
+- `hermes auth add openai-codex` 預設走裝置代碼，UCLIT 選了會「請聯絡工作空間管理員以啟用裝置代碼驗證」。admin.openai.com 工作區設定裡「啟用 Codex、Excel、PowerPoint 和 Word 的裝置代碼登入」打開後仍然不行
+- 改用 **`hermes auth add openai-codex --browser`**（PKCE，回呼 `localhost:1455`），選 UCLIT 一次成功。同意畫面的「個人帳戶」是同一個登入底下的免費空間，不要選
+- `hermes model` 要真的終端機（Terminal.app），在 Claude Code 的 `!` 裡會報「requires an interactive terminal」
+- 換完要 `launchctl kickstart -k gui/$(id -u)/ai.hermes.gateway`，log 出現 `Model context warmed: gpt-6.1-terra` 才算數
+
 ## 3. 開洞（只有要對話才做）
 
 ```bash
