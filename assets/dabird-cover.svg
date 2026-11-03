@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 878" width="1080" height="878">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#173F63"/><stop offset="1" stop-color="#3E86C2"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#D9A066"/><stop offset="1" stop-color="#B9773F"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="878" fill="url(#sky)"/>
+  <!-- stars / lights -->
+  <g fill="#fff" opacity=".35">
+    <circle cx="120" cy="90" r="3"/><circle cx="260" cy="150" r="2"/><circle cx="430" cy="70" r="2.5"/>
+    <circle cx="620" cy="120" r="2"/><circle cx="980" cy="60" r="3"/><circle cx="560" cy="40" r="2"/>
+  </g>
+  <!-- floor -->
+  <rect y="620" width="1080" height="258" fill="url(#floor)"/>
+  <g stroke="#F6E7D2" stroke-width="5" fill="none" opacity=".85">
+    <line x1="0" y1="620" x2="1080" y2="620"/>
+    <path d="M1080 650 A330 120 0 0 0 600 878"/>
+    <rect x="860" y="650" width="220" height="228"/>
+  </g>
+  <g stroke="#A86836" stroke-width="2" opacity=".35">
+    <line x1="0" y1="690" x2="1080" y2="690"/><line x1="0" y1="760" x2="1080" y2="760"/><line x1="0" y1="830" x2="1080" y2="830"/>
+  </g>
+  <!-- hoop -->
+  <rect x="1000" y="250" width="16" height="370" fill="#0F2C47"/>
+  <rect x="880" y="180" width="170" height="118" rx="6" fill="#F7F3EC" stroke="#0F2C47" stroke-width="5"/>
+  <rect x="930" y="222" width="70" height="52" fill="none" stroke="#E2553A" stroke-width="5"/>
+  <ellipse cx="912" cy="300" rx="52" ry="11" fill="none" stroke="#E2553A" stroke-width="7"/>
+  <g stroke="#fff" stroke-width="3" opacity=".9">
+    <path d="M862 302 L874 362 M884 308 L890 366 M912 311 L912 368 M940 308 L934 366 M962 302 L950 362"/>
+    <path d="M868 330 Q912 342 956 330 M874 356 Q912 366 950 356"/>
+  </g>
+  <!-- shot arc -->
+  <path d="M150 560 Q470 40 880 270" fill="none" stroke="#fff" stroke-width="5" stroke-dasharray="4 18" stroke-linecap="round" opacity=".75"/>
+  <g transform="translate(880 252)">
+    <circle r="30" fill="#E8772E" stroke="#1B2B3A" stroke-width="3"/>
+    <path d="M0 -30 V30 M-30 0 H30" stroke="#1B2B3A" stroke-width="3"/>
+    <path d="M-21 -21 Q-8 0 -21 21 M21 -21 Q8 0 21 21" fill="none" stroke="#1B2B3A" stroke-width="3"/>
+  </g>
+  <!-- feathers drifting -->
+  <g fill="#F7F3EC" opacity=".85">
+    <path d="M140 300 q30 -40 70 -30 q-20 40 -70 30 z"/>
+    <path d="M230 380 q22 -30 52 -22 q-15 30 -52 22 z" opacity=".7"/>
+    <path d="M90 440 q18 -24 42 -18 q-12 24 -42 18 z" opacity=".55"/>
+  </g>
+  <!-- title -->
+  <text x="80" y="170" font-family="Noto Sans CJK TC" font-weight="900" font-size="96" fill="#F7F3EC" letter-spacing="6">大鳥柏德</text>
+  <text x="84" y="225" font-family="Noto Sans CJK TC" font-weight="500" font-size="30" fill="#F5A524" letter-spacing="4">隨時待命的家庭小助手</text>
+</svg>

@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="640" height="640">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="70%">
+      <stop offset="0" stop-color="#4A90C8"/><stop offset="1" stop-color="#1D4A73"/>
+    </radialGradient>
+    <clipPath id="bodyClip"><ellipse cx="320" cy="390" rx="170" ry="180"/></clipPath>
+  </defs>
+  <rect width="640" height="640" fill="url(#bg)"/>
+  <ellipse cx="320" cy="585" rx="190" ry="22" fill="#163A5C" opacity=".55"/>
+  <!-- crest -->
+  <path d="M296 222 C282 170 300 150 312 140 C312 175 318 196 322 214 Z" fill="#14324F"/>
+  <path d="M322 214 C330 160 352 146 368 142 C356 176 346 200 338 222 Z" fill="#14324F"/>
+  <path d="M286 230 C262 196 268 172 276 160 C284 190 296 208 306 222 Z" fill="#1F4A70"/>
+  <!-- left wing -->
+  <ellipse cx="168" cy="420" rx="52" ry="96" transform="rotate(18 168 420)" fill="#A9C1D6"/>
+  <!-- right wing raised (behind body) -->
+  <ellipse cx="452" cy="300" rx="44" ry="100" transform="rotate(-35 452 300)" fill="#A9C1D6"/>
+  <!-- body -->
+  <ellipse cx="320" cy="390" rx="170" ry="180" fill="#F7F3EC"/>
+  <ellipse cx="320" cy="455" rx="108" ry="104" fill="#EAE2D4"/>
+  <!-- headband -->
+  <g clip-path="url(#bodyClip)">
+    <rect x="140" y="246" width="360" height="40" fill="#E2553A"/>
+    <rect x="140" y="261" width="360" height="9" fill="#FFFFFF"/>
+  </g>
+  <!-- eyes -->
+  <circle cx="268" cy="335" r="34" fill="#fff" stroke="#1B2B3A" stroke-width="5"/>
+  <circle cx="372" cy="335" r="34" fill="#fff" stroke="#1B2B3A" stroke-width="5"/>
+  <circle cx="278" cy="340" r="16" fill="#1B2B3A"/>
+  <circle cx="382" cy="340" r="16" fill="#1B2B3A"/>
+  <circle cx="284" cy="333" r="5" fill="#fff"/>
+  <circle cx="388" cy="333" r="5" fill="#fff"/>
+  <!-- cheeks -->
+  <ellipse cx="236" cy="384" rx="20" ry="11" fill="#F2A7A0" opacity=".7"/>
+  <ellipse cx="404" cy="384" rx="20" ry="11" fill="#F2A7A0" opacity=".7"/>
+  <!-- beak -->
+  <path d="M292 368 Q320 358 348 368 Q336 400 320 410 Q304 400 292 368 Z" fill="#F5A524" stroke="#D9861A" stroke-width="3" stroke-linejoin="round"/>
+  <!-- feet -->
+  <path d="M276 562 l-18 14 h44 z" fill="#F5A524"/>
+  <path d="M364 562 l-18 14 h44 z" fill="#F5A524"/>
+  <!-- spin arcs -->
+  <path d="M432 214 A78 30 0 0 1 566 200" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".7"/>
+  <path d="M442 244 A72 26 0 0 0 556 240" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".45"/>
+  <!-- ball -->
+  <g transform="translate(500 212)">
+    <circle r="56" fill="#E8772E" stroke="#1B2B3A" stroke-width="4"/>
+    <path d="M0 -56 V56 M-56 0 H56" stroke="#1B2B3A" stroke-width="4"/>
+    <path d="M-40 -39 Q-14 0 -40 39 M40 -39 Q14 0 40 39" fill="none" stroke="#1B2B3A" stroke-width="4"/>
+  </g>
+</svg>
