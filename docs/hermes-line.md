@@ -129,12 +129,67 @@ fallback_providers:               # 主模型失敗（限速、錯誤、授權�
 - 選 terra 不選 sol：怕額度用太快；不夠聰明再換 `gpt-6.1-sol`，常被限速就換 `gpt-5.6-luna`。不要選 `-900k`（小鳥 5 萬 token 就壓縮，用不到長上下文）
 - 輔助任務（壓縮、看圖）沒設，`auto` 在沒有 OpenRouter／Nous 時跟主模型走，所以也是 GPT
 
+### 兩組帳號（2026-11-17）
+
+共用帳號的 Session 額度（5 小時視窗）常被同帳號其他用途吃滿，小鳥自己每天只有 5–33 次呼叫卻被連帶限速。額度是**各帳號分開算**的，所以加第二組憑證：
+
+```
+openai-codex (2 credentials):
+  #1  chatgpt-primary      id=f69390 priority=0   ← 先用（和外泌體助理同一個使用者）
+  #2  openai-codex-oauth-1 id=d187be priority=1   ← 備援（資訊室共用帳號）
+```
+
+- 加法：`hermes auth add openai-codex --browser --priority 0 --label chatgpt-primary`，之後 `launchctl kickstart -k gui/$(id -u)/ai.hermes.gateway`
+- 第一組用完（限速）才換第二組；兩組都屬 UCLIT 工作區，2027-05-01 一起停
+- `chatgpt-primary` 和外泌體助理（profile `exosome`）是同一個使用者，額度兩邊共用；各自一份 OAuth 授權，互不影響
+- 查額度（唯讀，不呼叫模型）：`hermes usage --provider openai-codex --json`，只顯示目前排第一那組
+- **不要把另一個 profile 的 `auth.json` 憑證複製過來**：Codex refresh token 一次性輪替，兩處各存一份會互相作廢。要共用就各自登一次
+- 重啟後 LINE 可能先報 `Could not bind LINE webhook on 127.0.0.1:8646`（舊行程還沒放掉 port），30 秒後 reconnection watcher 會自己接回，看到 `✓ line reconnected successfully` 即可
+
 登入踩坑：
 
 - `hermes auth add openai-codex` 預設走裝置代碼，UCLIT 選了會「請聯絡工作空間管理員以啟用裝置代碼驗證」。admin.openai.com 工作區設定裡「啟用 Codex、Excel、PowerPoint 和 Word 的裝置代碼登入」打開後仍然不行
 - 改用 **`hermes auth add openai-codex --browser`**（PKCE，回呼 `localhost:1455`），選 UCLIT 一次成功。同意畫面的「個人帳戶」是同一個登入底下的免費空間，不要選
 - `hermes model` 要真的終端機（Terminal.app），在 Claude Code 的 `!` 裡會報「requires an interactive terminal」
 - 換完要 `launchctl kickstart -k gui/$(id -u)/ai.hermes.gateway`，log 出現 `Model context warmed: gpt-6.1-terra` 才算數
+
+## 2.3 上下文壓縮與「小鳥變慢」（2026-11-17）
+
+症狀：小鳥偶爾某一則要等一分多鐘才回，而且越來越久。
+
+量測（`~/.hermes/logs/agent.log`）：
+
+- 模型本身沒變慢：`API call #` 的 latency 中位數兩週都在 3–7 秒
+- 慢的是**上下文壓縮**：對話累積到 `compression.threshold_tokens: 50000` 附近，Hermes 先把舊對話摘要一次，這一步卡住當下那則回覆。log 關鍵字 `compression_attempt`，看 `total_duration_ms`
+- 單次壓縮耗時：11/03–04 是 40–58 秒 → 11/08 80 秒 → 11/13 85 秒 → 11/16 97 秒 → 11/17 98 秒
+- 主要 session（`20261102_161837_…`）從 11/02 活到 11/17，已經摘要再摘要好幾輪；Hermes 核心不再定時重置 session，只有 `/new`、`/reset` 才會開新的
+
+處理第一步（11/17 已做）：壓縮跟主模型走（見 2.2），預設推理深度太高，調低：
+
+```yaml
+auxiliary:
+  compression:
+    reasoning_effort: "low"
+```
+
+- 設定檔自動重載，不用重啟；備份 `~/.hermes/config.yaml.bak-20261117`，不滿意刪掉這段即可
+- 效果待驗證：等下一次壓縮看 `total_duration_ms` 有沒有降下來
+
+查最近幾次壓縮耗時：
+
+```bash
+grep -h compression_attempt ~/.hermes/logs/agent.log | python3 -c "
+import sys,json
+for l in sys.stdin:
+    j=json.loads(l[l.index('{'):])
+    print(l[:16], '%3.0fs'%(j.get('total_duration_ms',0)/1000), j.get('trigger_source'), j.get('tokens_before'),'->',j.get('tokens_after'))" | tail
+```
+
+第二步（還沒做，先觀察第一步一兩天）：定時整合＋重啟 session。
+
+- 重啟：官方目錄 plugin `hermes-session-reset-policy`（讀頂層 `session_reset:`，mode `idle`／`daily`／`both`），過了界線後的第一則訊息開新 session。它只重置、不寫任何東西
+- 整合：重置前要有夜間排程把當天對話整理進筆記。**只寫獨立的每日流水帳，不直接改課表、接送表這些正本** —— 之前整合曾把未確認的內容寫進固定課表
+- 代價：重置後不記得「昨天聊到一半的事」，只能靠筆記接；私訊和群組是分開的 session，都會被重置
 
 ## 3. 開洞（只有要對話才做）
 
